@@ -22,11 +22,18 @@ public class PlayerBehaviour : MonoBehaviour
     private Rigidbody2D rigidbody;
     private Animator animatorController;
 
+
+    [Header("Dust Trail")]
+    public ParticleSystem dustTrail;
+    public Color dustTrailColor;
+
     // Start is called before the first frame update
     void Start()
     {
         rigidbody = GetComponent<Rigidbody2D>();
-        animatorController = GetComponent<Animator>(); 
+        animatorController = GetComponent<Animator>();
+
+        dustTrail = GetComponentInChildren<ParticleSystem>();
     }
 
     // Update is called once per frame
@@ -46,12 +53,14 @@ public class PlayerBehaviour : MonoBehaviour
             float y = (Input.GetAxisRaw("Vertical") + joystick.Vertical) * sensitivity;
             float jump = Input.GetAxisRaw("Jump") + ((UIController.jumpButtonDown) ? 1.0f : 0.0f);
 
+            
             // Check for Flip
 
             if (x != 0)
             {
                 x = FlipAnimation(x);
                 animatorController.SetInteger("AnimationState", (int)PlayerAnimationState.RUN);
+                CreateDustTrail();
             }
             else
             {
@@ -86,6 +95,7 @@ public class PlayerBehaviour : MonoBehaviour
                 float mass = rigidbody.mass * rigidbody.gravityScale;
 
                 rigidbody.AddForce(new Vector2(horizontalMoveForce, 0.0f) * mass);
+                CreateDustTrail();
             }
         }
 
@@ -124,6 +134,12 @@ public class PlayerBehaviour : MonoBehaviour
         }
     }
 
+
+    private void CreateDustTrail()
+    {
+        dustTrail.GetComponent<Renderer>().material.SetColor("_Color", dustTrailColor);
+        dustTrail.Play();
+    }
     private void OnCollisionExit2D(Collision2D collision)
     {
         if (collision.gameObject.CompareTag("Plataform"))
